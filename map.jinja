@@ -1,0 +1,49 @@
+{% set atomic = salt['grains.filter_by']({
+    'Fedora': {
+      'dist': 'fc' ~ grains['osmajorrelease'],
+      'dir': 'fedora/' ~ grains['osmajorrelease'],
+    },
+    'RedHat': {
+      'dist': 'el' ~ grains['osmajorrelease'],
+      'dir': 'redhat/' ~ grains['osmajorrelease'],
+    },
+    'CentOS': {
+      'dist': 'el' ~ grains['osmajorrelease'],
+      'dir': 'centos/' ~ grains['osmajorrelease'],
+    },
+    'Suse': {
+      'dist': 'suse' ~ grains['osmajorrelease'],
+      'dir': 'opensuse/' ~ grains['osmajorrelease'],
+    },
+    'Debian': {
+          'dist': grains['os'] | lower,
+          'dir': grains['oscodename'] | lower,
+    },
+    'Ubuntu': {
+          'dist': grains['os'] | lower,
+          'dir': grains['oscodename'] | lower,
+    },
+  }
+  , grain="os"
+  , merge=salt['pillar.get']('atomic:lookup'))
+%}
+
+{% if grains['os_family'] == 'Debian' %}
+{% do atomic.update({'repo': 'deb https://updates.atomicorp.com/channels/atomic/'
+                            + atomic.dist
+                            + " "
+                            + atomic.dir
+                            + ' main'
+                   })
+%}
+{% else %}
+{% do atomic.update({'repo': 'https://updates.atomicorp.com/channels/atomic/'
+                            + atomic.dir
+                            + '/'
+                            + grains['cpuarch']
+                            + '/RPMS/atomic-release-1.0-21.'
+                            + atomic.dist
+                            + '.art.noarch.rpm'
+                    })
+%}
+{% endif %}
