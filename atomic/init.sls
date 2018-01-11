@@ -3,6 +3,11 @@
 
 {% if grains['os_family'] == "RedHat" %}
 
+install_pubkey_atomic_art:
+  file.managed:
+    - name: /etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC-ART
+    - source: salt://atomic/files/RPM-GPG-KEY.art.txt
+
 install_pubkey_atomic:
   file.managed:
     - name: /etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
@@ -15,6 +20,7 @@ atomic-repo-{{ atomic.dist }}:
     - gpgcheck: 1
     - gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
     - require:
+      - file: install_pubkey_atomic_art
       - file: install_pubkey_atomic
 
 {% elif grains['os_family'] == "Debian" %}
