@@ -6,7 +6,7 @@
 install_pubkey_atomic:
   file.managed:
     - name: /etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
-    - source: salt://files/RPM-GPG-KEY.atomicorp.txt
+    - source: salt://atomic/files/RPM-GPG-KEY.atomicorp.txt
 
 atomic-repo-{{ atomic.dist }}:
  pkgrepo.managed:
