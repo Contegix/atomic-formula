@@ -13,7 +13,7 @@ atomic-repo-{{ atomic.dist }}:
     - humanname: {{ atomic.dist }}
     - mirrorlist: {{ atomic.repo }}
     - gpgcheck: 1
-    - gpgkey: {{ atomic.gpgkey }}
+    - gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
     - require:
       - file: install_pubkey_atomic
 
