@@ -5,20 +5,22 @@
 
 install_pubkey_atomic_art:
   file.managed:
-    - name: /etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC-ART
+    - name: /etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt
     - source: salt://atomic/files/RPM-GPG-KEY.art.txt
 
 install_pubkey_atomic:
   file.managed:
-    - name: /etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
+    - name: /etc/pki/rpm-gpg/RPM-GPG-KEY.atomicorp.txt
     - source: salt://atomic/files/RPM-GPG-KEY.atomicorp.txt
 
 atomic-repo-{{ atomic.dist }}:
  pkgrepo.managed:
-    - humanname: {{ atomic.dist }}
+    - humanname: atomic
     - mirrorlist: {{ atomic.repo }}
     - gpgcheck: 1
-    - gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIC
+    - gpgkey: >
+        file:///etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt 
+        file:///etc/pki/rpm-gpg/RPM-GPG-KEY.atomicorp.txt
     - require:
       - file: install_pubkey_atomic_art
       - file: install_pubkey_atomic
