@@ -7,7 +7,7 @@ atomic-repo-{{ atomic.dist }}:
     - humanname: {{ atomic.dist }}
     - mirrorlist: {{ atomic.repo }}
     - gpgcheck: 1
-    - gpgkey: salt://atomic/files/RPM-GPG-KEY.atomicorp.txt
+    - gpgkey: {{ atomic.gpgkey }}
 
 {% elif grains['os_family'] == "Debian" %}
 atomic-repo-{{ atomic.dist }}:
@@ -15,5 +15,5 @@ atomic-repo-{{ atomic.dist }}:
     - humanname: {{ atomic.dist }}
     - name: {{ atomic.repo }}
     - gpgcheck: 1
-    - gpgkey: salt://atomic/files/RPM-GPG-KEY.atomicorp.txt
+    - gpgkey: {{ atomic.gpgkey }}
 {% endif %}
