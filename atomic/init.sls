@@ -14,13 +14,8 @@ install_pubkey_atomic:
     - source: salt://atomic/files/RPM-GPG-KEY.atomicorp.txt
 
 atomic-repo-{{ atomic.dist }}:
- pkgrepo.managed:
-    - humanname: atomic
-    - mirrorlist: {{ atomic.repo }}
-    - gpgcheck: 1
-    - gpgkey: >
-        file:///etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt 
-        file:///etc/pki/rpm-gpg/RPM-GPG-KEY.atomicorp.txt
+ pkg.installed:
+    - name: https://updates.atomicorp.com/channels/atomic/centos/6/x86_64/RPMS/atomic-release-1.0-21.el6.art.noarch.rpm
     - require:
       - file: install_pubkey_atomic_art
       - file: install_pubkey_atomic
