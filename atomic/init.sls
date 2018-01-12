@@ -19,7 +19,7 @@ atomic-repo-{{ atomic.dist }}:
     - require:
       - file: install_pubkey_atomic_art
       - file: install_pubkey_atomic
-    - unless: 'test ! -e /etc/yum.repos.d/atomic.repo'
+    - unless: 'test -e /etc/yum.repos.d/atomic.repo'
 
 {% elif grains['os_family'] == "Debian" %}
 atomic-repo-{{ atomic.dist }}:
