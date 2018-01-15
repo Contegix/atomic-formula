@@ -18,10 +18,12 @@
     'Debian': {
           'dist': grains['os'] | lower,
           'dir': grains['oscodename'] | lower,
+          'gpgkey': 'https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt',
     },
     'Ubuntu': {
           'dist': grains['os'] | lower,
           'dir': grains['oscodename'] | lower,
+          'gpgkey': 'https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt',
     },
   }
   , grain="os"
