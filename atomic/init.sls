@@ -15,10 +15,12 @@ install_pubkey_atomic:
 
 atomic-repo-{{ atomic.dist }}:
  pkg.installed:
-    - name: https://updates.atomicorp.com/channels/atomic/centos/6/x86_64/RPMS/atomic-release-1.0-21.el6.art.noarch.rpm
+    - sources:
+      - atomic-release: https://updates.atomicorp.com/channels/atomic/centos/6/x86_64/RPMS/atomic-release-1.0-21.el6.art.noarch.rpm
     - require:
       - file: install_pubkey_atomic_art
       - file: install_pubkey_atomic
+    - unless: 'test -e /etc/yum.repos.d/atomic.repo'
 
 {% elif grains['os_family'] == "Debian" %}
 atomic-repo-{{ atomic.dist }}:
