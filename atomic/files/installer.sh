@@ -1,6 +1,6 @@
 #!/bin/bash
 # Name: Atomic Archive configuration script
-# Copyright Atomicorp, 2002-2018
+# Copyright Atomicorp, 2002-2022
 # License: AGPL
 # Credits
 # 	Scott R. Shinn (atomicorp)
@@ -8,10 +8,10 @@
 #
 
 export LANG=C
-ATOMIC_VER="5.0.2"
+ATOMIC_VER="7.2.0"
 VERSION="1.0-21"
 SERVER=updates.atomicorp.com
-ARCH=`uname -i`
+ARCH=`arch`
 
 
 # Input validation function 
@@ -30,13 +30,32 @@ check_input () {
       INPUTTEXT=$default
       return 1
     fi
-    echo $INPUTTEXT | egrep -q "$validate" && return 1
+    echo $INPUTTEXT | grep -E -q "$validate" && return 1
     echo "Invalid input"
   done
 
 }
 
 
+function detect_downloader() {
+        if [ -f /bin/curl ]; then
+                GET="/bin/curl -f -s -O"
+        elif [ -f /usr/bin/curl ]; then
+                GET="/usr/bin/curl -s -O"
+        elif [ -f /usr/local/bin/curl ]; then
+                GET="/usr/local/bin/curl -s -O"
+        elif [ -f /bin/wget ]; then
+                GET="/bin/wget -q"
+        elif [ -f /usr/bin/wget ]; then
+                GET="/usr/bin/wget -q"
+        else
+                echo "Error: downloader not detected. Exiting"
+                exit 1
+        fi
+}
+
+
+sleep 1
 echo
 echo "Atomic Free Unsupported Archive installer, version $ATOMIC_VER"
 echo
@@ -62,6 +81,7 @@ echo "For supported software packages please contact us at: "
 echo
 echo "  sales@atomicorp.com"
 echo
+
 
 if [ ! $NON_INT ]; then
 	check_input "Do you agree to these terms? (yes/no) [Default: yes]" "yes|no" "yes"
@@ -228,8 +248,24 @@ elif grep -q "Fedora release 33 " $RELEASE ; then
 elif grep -q "Fedora release 34 " $RELEASE ; then
   DIST="fc34"
   DIR=fedora/34
-  VERSION="1.0-22"
-elif egrep -q "Red Hat Enterprise Linux (A|E)S release 3 " $RELEASE ; then
+  VERSION="1.0-23"
+elif grep -q "Fedora release 35 " $RELEASE ; then
+  DIST="fc35"
+  DIR=fedora/35
+  VERSION="1.0-23"
+elif grep -q "Fedora release 36 " $RELEASE ; then
+  DIST="fc36"
+  DIR=fedora/36
+  VERSION="1.0-23"
+elif grep -q "Fedora release 37 " $RELEASE ; then
+  DIST="fc37"
+  DIR=fedora/37
+  VERSION="1.0-23"
+elif grep -q "Fedora release 38 " $RELEASE ; then
+  DIST="fc38"
+  DIR=fedora/38
+  VERSION="1.0-23"
+elif grep -E -q "Red Hat Enterprise Linux (A|E)S release 3 " $RELEASE ; then
   DIST="el3"
   DIR=redhat/3
   echo
@@ -245,25 +281,27 @@ elif grep -q "CentOS release 3" $RELEASE ; then
   echo "see http://$SERVER/channels for instructions"
   echo
   exit 1
-elif egrep -q "Red Hat Enterprise Linux (A|E|W)S release 4" $RELEASE ; then
+elif grep -E -q "Red Hat Enterprise Linux (A|E|W)S release 4" $RELEASE ; then
   DIST="el4"
   DIR=redhat/4
   echo "$RELEASE is not supported at this time, you will need to configure yum manually:"
   echo "see http://$SERVER/channels for instructions"
   echo
   exit 1
-elif egrep -q "Red Hat Enterprise Linux.*release 5" $RELEASE ; then
+elif grep -E -q "Red Hat Enterprise Linux.*release 5" $RELEASE ; then
   DIST="el5"
   DIR=redhat/5
-elif egrep -q "Red Hat Enterprise Linux.*release 6" $RELEASE ; then
+elif grep -E -q "Red Hat Enterprise Linux.*release 6" $RELEASE ; then
   DIST="el6"
   DIR=redhat/6
-elif egrep -q "Red Hat Enterprise Linux.* 7" $RELEASE ; then
+elif grep -E -q "Red Hat Enterprise Linux.* 7" $RELEASE ; then
   DIST="el7"
   DIR=redhat/7
-elif egrep -q "Red Hat Enterprise Linux.* 8" $RELEASE ; then
+  VERSION="1.0-23"
+elif grep -E -q "Red Hat Enterprise Linux.* 8" $RELEASE ; then
   DIST="el8"
   DIR=redhat/8
+  VERSION="1.0-23"
 elif grep -q "CentOS release 3" $RELEASE ; then
   DIST="el3"
   DIR=centos/3
@@ -276,88 +314,106 @@ elif grep -q "CentOS release 4" $RELEASE ; then
   echo "$RELEASE is not supported at this time, you will need to configure yum manually:"
   echo "see http://$SERVER/channels for instructions"
   echo
-elif egrep -q "(release 5|release 2011)" $RELEASE ; then
+elif grep -E -q "(release 5|release 2011)" $RELEASE ; then
   DIST="el5"
   DIR=centos/5
-elif egrep -q "(release 6|release 2012)" $RELEASE ; then
+elif grep -E -q "(release 6|release 2012)" $RELEASE ; then
   DIST="el6"
   DIR=centos/6
-elif egrep -q "(release 7|release 2014)" $RELEASE ; then
+elif grep -E -q "(release 7|release 2014)" $RELEASE ; then
   DIST="el7"
   DIR=centos/7
-elif egrep -q "(release 8|release 2019)" $RELEASE ; then
+  VERSION="1.0-23"
+elif grep -E -q "(release 8|release 2019)" $RELEASE ; then
   DIST="el8"
   DIR=centos/8
-elif egrep -q "(Amazon Linux AMI|Amazon Linux 2).*" $RELEASE ; then
+  VERSION="1.0-23"
+elif grep -E -q "(release 9)" $RELEASE ; then
+  DIST="el9"
+  DIR=rocky/9
+  VERSION="1.0-23"
+elif grep -E -q "(Amazon Linux AMI|Amazon Linux 2).*" $RELEASE ; then
   DIST="amazon-2"
   DIR=amazon/2
   PKG="amazon"
-elif egrep -q "(Amazon Linux AMI|Amazon)" $RELEASE ; then
+elif grep -E -q "(Amazon Linux AMI|Amazon)" $RELEASE ; then
   DIST="amazon-1"
   DIR=amazon/1
   PKG="amazon"
-elif egrep -q "openSUSE 12" $RELEASE ; then
+elif grep -E -q "openSUSE 12" $RELEASE ; then
   DIST="suse12"
   DIR=opensuse/12
-elif egrep -q "openSUSE 13" $RELEASE ; then
+elif grep -E -q "openSUSE 13" $RELEASE ; then
   DIST="suse13"
   DIR=opensuse/13
-elif egrep -q "^6.0" $RELEASE ; then
+elif grep -E -q "^6.0" $RELEASE ; then
   DIST="debian"
   DIR="squeeze"
   PKG=deb
-elif egrep -q "wheezy" $RELEASE ; then
+elif grep -E -q "wheezy" $RELEASE ; then
   DIST="debian"
   DIR="wheezy"
   PKG=deb
-elif egrep -q "jessie" $RELEASE ; then
+elif grep -E -q "jessie" $RELEASE ; then
   DIST="debian"
   DIR="jessie"
   PKG=deb
-elif egrep -q "stretch" $RELEASE ; then
+elif grep -E -q "stretch" $RELEASE ; then
   DIST="debian"
   DIR="stretch"
   PKG=deb
-elif egrep -q "buster" $RELEASE ; then
+elif grep -E -q "buster" $RELEASE ; then
   DIST="debian"
   DIR="buster"
   PKG=deb
-elif egrep -q "lucid" $RELEASE ; then
+elif grep -E -q "bullseye" $RELEASE ; then
+  DIST="debian"
+  DIR="bullseye"
+  PKG=deb2
+elif grep -E -q "bookworm" $RELEASE ; then
+  DIST="debian"
+  DIR="bookworm"
+  PKG=deb2
+elif grep -E -q "lucid" $RELEASE ; then
   DIST="ubuntu"
   DIR="lucid"
   PKG=deb
-elif egrep -q "precise" $RELEASE ; then
+elif grep -E -q "precise" $RELEASE ; then
   DIST="ubuntu"
   DIR="precise"
   PKG=deb
-elif egrep -q "Raring Ringtail" $RELEASE ; then
+elif grep -E -q "Raring Ringtail" $RELEASE ; then
   DIST="ubuntu"
   DIR="raring"
   PKG=deb
-elif egrep -q "Trusty Tahr" $RELEASE ; then
+elif grep -E -q "Trusty Tahr" $RELEASE ; then
   DIST="ubuntu"
   DIR="trusty"
   PKG=deb
-elif egrep -q "Xenial|Mint" $RELEASE ; then
+elif grep -E -q "Xenial|Mint" $RELEASE ; then
   DIST="ubuntu"
   DIR="xenial"
   PKG=deb
-elif egrep -qi "artful" $RELEASE ; then
+elif grep -E -qi "artful" $RELEASE ; then
   DIST="ubuntu"
   DIR="artful"
   PKG=deb
-elif egrep -qi "bionic" $RELEASE ; then
+elif grep -E -qi "bionic" $RELEASE ; then
   DIST="ubuntu"
   DIR="bionic"
   PKG=deb
-elif egrep -qi "kali" $RELEASE ; then
+elif grep -E -qi "kali" $RELEASE ; then
   DIST="kali"
   DIR="kali"
   PKG=deb
-elif egrep -qi "focal fossa" $RELEASE; then 
+elif grep -E -qi "focal fossa" $RELEASE; then 
   DIST="ubuntu"
   DIR="focal"
-  PKG=deb
+  PKG=deb2
+elif grep -E -qi "jammy jellyfish" $RELEASE; then
+  DIST="ubuntu"
+  DIR="jammy"
+  PKG=deb2
 else 
   echo "Error: Unable to determine distribution type. Please send the contents of $RELEASE to support@atomicrocketturtle.com"
   exit 1
@@ -399,6 +455,7 @@ EOF
 
 }
 
+
 # RPM Distros
 yum_install () {
 
@@ -423,23 +480,23 @@ yum_install () {
 	rpm -import RPM-GPG-KEY.atomicorp.txt >/dev/null 2>&1
 
 
-    	echo -n "Downloading $ATOMIC: "
-    	wget -q http://$SERVER/channels/atomic/$DIR/$ARCH/RPMS/$ATOMIC >/dev/null 2>&1 
+  	echo -n "Downloading $ATOMIC: "
+  	$GET https://$SERVER/channels/atomic/$DIR/$ARCH/RPMS/$ATOMIC >/dev/null 2>&1 
 	if [ $? -ne 0 ]; then
 		echo "Error: File $ATOMIC not found."
+		echo "$GET https://$SERVER/channels/atomic/$DIR/$ARCH/RPMS/$ATOMIC"
 		echo
 		exit
 	fi
 
-    	if [ -f $ATOMIC ]; then
-      		rpm -Uvh $ATOMIC  || exit 1
-      		rm -f $ATOMIC
-    	else
-      		echo "ERROR: $ATOMIC was not downloaded."
-      		exit 1
-    	fi
+  if [ -f $ATOMIC ]; then
+  	rpm -Uvh $ATOMIC  || exit 1
+  	rm -f $ATOMIC
+  else
+  	echo "ERROR: $ATOMIC was not downloaded."
+   		exit 1
+  fi
 
-    	echo "OK"
 
 	if [ ! -f /etc/yum.repos.d/atomic.repo ]; then
 		echo "Error: /etc/yum.repos.d/atomic.repo was not detected."
@@ -458,14 +515,40 @@ yum_install () {
 
 }
 
-# DEB Distros
+apt_install_2 () {
+	APT_SOURCES="/etc/apt/sources.list.d/atomic.list"
+	ARCH=$(dpkg --print-architecture)
+
+	# GPG dependency
+	if [ ! -f /usr/bin/gpg ]; then
+		/usr/bin/apt-get update
+        	/usr/bin/apt-get -y --force-yes install gpg
+	fi
+        $GET https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt 
+      	cat RPM-GPG-KEY.atomicorp.txt | apt-key add -
+        if [ $? -ne 0 ]; then
+                echo
+                echo "Error: Installation failed"
+                echo
+                exit 1
+        fi
+
+	echo -n "Adding [atomic] to $APT_SOURCES: "
+        echo "deb [trusted=yes] https://updates.atomicorp.com/channels/atomic/${DIST} ${DIR}/${ARCH}/ " > $APT_SOURCES
+	echo "OK"
+
+	
+}
+
+# DEB Distros (Legacy repo)
 apt_install () {
 
         /usr/bin/apt-get update
 
         /usr/bin/apt-get -y --force-yes install gpg
 
-        wget -O -  https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt | apt-key add -
+        $GET https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt 
+	cat RPM-GPG-KEY.atomicorp.txt| apt-key add -
         if [ $? -ne 0 ]; then
                 echo
                 echo "Error: Installation failed"
@@ -502,15 +585,16 @@ apt_install () {
 
 # Installation
 
+detect_downloader
 
 # GPG Keys
 echo -n "Installing the Atomic GPG keys: "
 if [ ! -f RPM-GPG-KEY.art.txt ]; then
-  wget -q https://www.atomicorp.com/RPM-GPG-KEY.art.txt 1>/dev/null 2>&1
+	$GET https://www.atomicorp.com/RPM-GPG-KEY.art.txt 1>/dev/null 2>&1
 fi
 
 if [ ! -f RPM-GPG-KEY.atomicorp.txt ]; then
-  wget -q https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt 1>/dev/null 2>&1
+	$GET https://www.atomicorp.com/RPM-GPG-KEY.atomicorp.txt 1>/dev/null 2>&1
 fi
 echo "OK"
 echo
@@ -519,6 +603,8 @@ if [ "$PKG" == "rpm" ]; then
 	yum_install
 elif [ "$PKG" == "deb" ]; then
 	apt_install
+elif [ "$PKG" == "deb2" ]; then
+	apt_install_2
 elif [ "$PKG" == "amazon" ]; then
 	amazon_install
 
