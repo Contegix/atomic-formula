@@ -1,4 +1,8 @@
 {% set atomic = salt['grains.filter_by']({
+    'Rocky': {
+      'dist': 'el' ~ grains['osmajorrelease'],
+      'dir': 'rocky/' ~ grains['osmajorrelease'],
+    },    
     'Fedora': {
       'dist': 'fc' ~ grains['osmajorrelease'],
       'dir': 'fedora/' ~ grains['osmajorrelease'],
